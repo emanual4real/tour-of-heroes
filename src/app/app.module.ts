@@ -7,9 +7,10 @@ import { HeroDetailComponent } from './components/hero-detail/hero-detail.compon
 import { HeroesComponent } from './components/heroes/heroes.component';
 import { MessagesComponent } from './components/messages/messages.component';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './mocks/in-memory-data.service';
+import { InterceptorService } from './services/interceptor.service';
 
 @NgModule({
   imports: [
@@ -31,7 +32,13 @@ import { InMemoryDataService } from './mocks/in-memory-data.service';
     HeroDetailComponent,
     MessagesComponent,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: InterceptorService,
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
