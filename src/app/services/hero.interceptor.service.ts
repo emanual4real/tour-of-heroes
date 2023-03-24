@@ -1,4 +1,5 @@
 import {
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
@@ -7,11 +8,12 @@ import {
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { delay, Observable, of } from 'rxjs';
+import { HEROES } from '../mocks/mock-heroes';
 
 @Injectable({
   providedIn: 'root',
 })
-export class InterceptorService implements HttpInterceptor {
+export class HeroServiceInterceptor implements HttpInterceptor {
   constructor() {}
 
   intercept(
@@ -24,17 +26,34 @@ export class InterceptorService implements HttpInterceptor {
     // pass it on
     // return next.handle(req);
 
+    console.log('req', req);
     return this.handleRequests(req, next);
   }
 
   handleRequests(req: HttpRequest<any>, next: HttpHandler): any {
     const { url, method } = req;
-    if (url.endsWith('/fake') && method === 'GET') {
-      return of(new HttpResponse({ status: 200, body: 'BUY' })).pipe(
-        delay(500)
-      );
+
+    switch (method) {
+      case 'GET': {
+        if (url === 'api/heroes1') {
+          return of(new HttpResponse({ status: 200, body: HEROES })).pipe(
+            delay(500)
+          );
+        }
+        return of(
+          new HttpErrorResponse({
+            status: 404,
+            statusText: 'Not Found',
+            url,
+            error: 'uggggggh.',
+          })
+        );
+      }
+      case 'POST': {
+        return next.handle(req);
+      }
+      default:
+        return next.handle(req);
     }
-    // if there is not any matches return default request.
-    return next.handle(req);
   }
 }
